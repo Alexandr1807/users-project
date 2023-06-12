@@ -1,10 +1,11 @@
-import logo from './logo.svg';
 import './App.css';
+import UsersTable from './components/UsersTable/UsersTable';
 
 function App() {
+
   return (
-    <div className="App">
-      
+    <div className="container">
+      <UsersTable />
     </div>
   );
 }
