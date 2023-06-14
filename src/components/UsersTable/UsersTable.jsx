@@ -2,9 +2,10 @@ import React, {useState, useEffect} from 'react'
 import {  Avatar, Button, List, Skeleton } from 'antd'
 import { Link } from "react-router-dom";
 import { useLazyGetUsersQuery } from '../../redux/randomUsersApi';
+import './UsersTable.css'
 
 function UsersTable() {
-  const count = 5;
+  const count = 10;
   const [getUsers] = useLazyGetUsersQuery();
   const [initLoading, setInitLoading] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -58,26 +59,29 @@ function UsersTable() {
     ) : null;
 
   return (
-    <List
-      className="demo-loadmore-list"
-      loading={initLoading}
-      itemLayout="horizontal"
-      loadMore={loadMore}
-      dataSource={list}
-      renderItem={(item) => (
-        <List.Item
-          actions={[<Link to='/profile' state={{ from: item}} key="list-loadmore-more">More</Link>]}
-        >
-          <Skeleton avatar title={false} loading={item.loading} active>
-            <List.Item.Meta
-              avatar={<Avatar src={item.picture.large} />}
-              title={<a href="https://ant.design">{item.name?.first} {item.name?.last}</a>}
-              description={item.location?.country}
-            />
-          </Skeleton>
-        </List.Item>
-      )}
-    />
+    <div className="users-table__wrapper">
+      <h1 className='users-table__title'>Random Users</h1>
+      <List
+        className="demo-loadmore-list"
+        loading={initLoading}
+        itemLayout="horizontal"
+        loadMore={loadMore}
+        dataSource={list}
+        renderItem={(item) => (
+          <List.Item
+            actions={[<Link to={'user/' + item.cell} state={{ from: item}} key="list-loadmore-more">More</Link>]}
+          >
+            <Skeleton avatar title={false} loading={item.loading} active>
+              <List.Item.Meta
+                avatar={<Avatar src={item.picture.large} />}
+                title={[<Link to={'user/' + item.cell} state={{ from: item}} key="list-loadmore-more">{item.name?.first} {item.name?.last}</Link>]}
+                description={item.location?.country}
+              />
+            </Skeleton>
+          </List.Item>
+        )}
+      />
+    </div>
   );
 };
 
