@@ -1,30 +1,30 @@
 import React, {useState, useEffect} from 'react'
-import {  Avatar, Button, List, Skeleton  } from 'antd'
+import {  Avatar, Button, List, Skeleton } from 'antd'
+import { Link } from "react-router-dom";
+import { useLazyGetUsersQuery } from '../../redux/randomUsersApi';
 
 function UsersTable() {
+  const count = 5;
+  const [getUsers] = useLazyGetUsersQuery();
   const [initLoading, setInitLoading] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState([]);
   const [list, setList] = useState([]);
-  const count = 10;
 
-  let fakeDataUrl = `https://randomuser.me/api/?results=${count}`
-
-  useEffect(() => {
-    fetch(fakeDataUrl)
-      .then((res) => res.json())
-      .then((res) => {
-        setInitLoading(false);
-        setData(res.results);
-        setList(res.results);
-        console.log(res.results)
-      });
-  }, []);
+  
+  useEffect( () => {
+    getUsers(count)
+    .unwrap()
+    .then((fulfilled) => {
+      setList(fulfilled.results)
+      setInitLoading(false)
+    })
+    .catch((rejected) => console.error(rejected));
+  }, [])
 
   const onLoadMore = () => {
     setLoading(true);
     setList(
-      data.concat(
+      list.concat(
         [...new Array(count)].map(() => ({
           loading: true,
           name: {},
@@ -33,16 +33,15 @@ function UsersTable() {
       ),
     );
 
-    fetch(fakeDataUrl)
-      .then((res) => res.json())
-      .then((res) => {
-        const newData = data.concat(res.results);
-        setData(newData);
-        setList(newData);
-        setLoading(false);
-        window.dispatchEvent(new Event('resize'));
-      });
-  };
+    getUsers(count)
+    .unwrap()
+    .then((fulfilled) => {
+      setList(list.concat(fulfilled.results))
+      setLoading(false);
+      window.dispatchEvent(new Event('resize'));
+    })
+    .catch((rejected) => console.error(rejected));
+  }
 
   const loadMore =
     !initLoading && !loading ? (
@@ -57,7 +56,7 @@ function UsersTable() {
         <Button onClick={onLoadMore}>More</Button>
       </div>
     ) : null;
-    
+
   return (
     <List
       className="demo-loadmore-list"
@@ -67,12 +66,12 @@ function UsersTable() {
       dataSource={list}
       renderItem={(item) => (
         <List.Item
-          actions={[<a key="list-loadmore-more">More</a>]}
+          actions={[<Link to='/profile' state={{ from: item}} key="list-loadmore-more">More</Link>]}
         >
           <Skeleton avatar title={false} loading={item.loading} active>
             <List.Item.Meta
               avatar={<Avatar src={item.picture.large} />}
-              title={<a href="https://ant.design">{item.name?.last}</a>}
+              title={<a href="https://ant.design">{item.name?.first} {item.name?.last}</a>}
               description={item.location?.country}
             />
           </Skeleton>
